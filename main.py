@@ -21,6 +21,7 @@ team1 = (RandomStrat, RandomStrat, RandomStrat, RandomStrat) # Update these two 
 team2 = (RandomStrat, RandomStrat, RandomStrat, RandomStrat) # which ants are on which teams
 
 ants = []
+deadAnts = []
 
 # Constants for rendering matrix
 EMPTY = 0
@@ -41,6 +42,7 @@ matrixSymbols = { EMPTY: '.', WALL: '#', NORTHHILL: '@', SOUTHHILL: 'X',
                 SOUTHTEAM1: 'E', SOUTHTEAM2: 'F', SOUTHTEAM3: 'G', SOUTHTEAM4: 'H' }  
 
 class Ant:
+
     def __init__(self, strategy, x, y, team, symbol):
         self.strategy = strategy
         self.x = x
@@ -49,7 +51,10 @@ class Ant:
         self.symbol = symbol
         self.food = False
         self.alive = True
-        
+    
+    def die(self):
+        self.alive = False
+
     def act(self, vision):
         return self.strategy.oneStep(self.x, self.y, vision, self.food)
     
@@ -58,6 +63,7 @@ class Ant:
     
     def recv(self):
         return self.strategy.sendInfo()
+        
 
 def isOpenCell(matrix, x, y):
     """Check if a cell in matrix is in bounds and not a wall."""
@@ -65,8 +71,8 @@ def isOpenCell(matrix, x, y):
     
 def initializeAnts(team1Strats, team1Locs, team2Strats, team2Locs):
     """
-    Instantiate ant classes for each team, populating ants array and dictionary
-    of Ant->matrixKey mappings. Takes two arrays for each team: class names and
+    Instantiate ant classes for each team, populating ants list and dictionary
+    of Ant->matrixKey mappings. Takes two lists for each team: class names and
     inital positions
     """
     # Team 1
@@ -117,8 +123,10 @@ def placeFood(matrix, amountFood):
             amountFood -= 1
             
 def placeAnts(matrix, ants):
+    """Put appropriate code for each live ant at x,y location in matrix."""
     for a in ants:
-        matrix[a.x][a.y].append(antMatrixDict[a])
+        if a.alive:
+            matrix[a.x][a.y].append(antMatrixDict[a])
         
 def initializeMatrix(matrix, amountFood, numObstacles, ants):
     for i in range(cols):# Create initial array
@@ -192,23 +200,33 @@ def gameLoop(matrix, ants):
                     "SOUTHWEST": lambda x, y: (x-1, y+1),
                     "NORTHWEST": lambda x, y: (x-1, y-1) }
     while True:
+        # Assume all ants are alive at beginning of the round
+        
         #input() # Pause for me to hit enter!
         #time.sleep(1) # Comment this out for stress testing
         
         # Pass messages to ants and clear buffers
         for a in ants:
-            if a.team == 1:
-                a.send(team1Messages)
-            elif a.team == 2:
-                a.send(team2Messages)
-    
+            try:
+                if a.team == 1:
+                    a.send(team1Messages)
+                elif a.team == 2:
+                    a.send(team2Messages)
+            except:
+                a.die()
+                deadAnts.append(a)
     
         # Prompt ants for next move (serial for now)
         moves = dict((a, "PASS") for a in ants)
         for a in ants:
-            moves[a] = a.act(generateVision(matrix, a.x, a.y)).split()
-            print(moves[a])
-    
+            if a.alive:
+                try:
+                    moves[a] = a.act(generateVision(matrix, a.x, a.y)).split()
+                    print(moves[a])
+                except:
+                    a.die()
+                    deadAnts.append(a)
+                
         # Parse moves
         proposedMoves = {}
         proposedGets = {}
@@ -217,28 +235,28 @@ def gameLoop(matrix, ants):
             
             if move[0] in transformXY and len(move) == 1: # Cardinal movement
                 newLoc = transformXY[move[0]](loc[0], loc[1])
-                if newLoc[0] > 0 and newLoc[0] < cols and newLoc[1] > 0 and newLoc[1] < rows:
-                    if WALL not in matrix[newLoc[0]][newLoc[1]]: # In bounds, no obstacle
-                        loc = newLoc
-            
+                if isOpenCell(matrix, newLoc[0], newLoc[1]):
+                    loc = newLoc
+
             elif move[0] == "GET":
                 if len(move) != 2 or move[1] not in transformXY:
-                    # Kill the ant for an erroneous command?
-                    pass
+                    a.die()
+                    deadAnts.append(a)
                 elif not a.food: # Can't carry more than one!
                     targetX, targetY = transformXY[move[1]](a.x, a.y)
-                    if targetX > 0 and targetX < cols-1 and targetY > 0 and targetY < rows-1 and WALL not in matrix[targetX][targetY]:
+                    if isOpenCell(matrix, targetX, targetY):
                         if (targetX, targetY) in proposedGets:
                             proposedGets[(targetX, targetY)].append(a)
                         else:
                             proposedGets[(targetX, targetY)] = [a]
+                            
             elif move[0] == "DROP":
                 if len(move) != 2 or move[1] not in transformXY:
-                    # Kill the ant
-                    pass
+                    a.die()
+                    deadAnts.append(a)
                 elif a.food:
                     targetX, targetY = transformXY[move[1]](a.x, a.y)
-                    if targetX > 0 and targetX < cols-1 and targetY > 0 and targetY < rows-1 and WALL not in matrix[targetX][targetY]:
+                    if isOpenCell(matrix, targetX, targetY):
                         for i, agent in enumerate(matrix[targetX][targetY]):
                             if agent == NORTHHILL:
                                 team1Points += 1
@@ -252,18 +270,18 @@ def gameLoop(matrix, ants):
                                 matrix[targetX][targetY][i] += 1
                                 a.food = False
                                 break
-                        else: # This else belongs to for loop, executes when loop exits normally
+                        else: # This else belongs to for, executes when loop exits normally
                             matrix[targetX][targetY] = [1] + matrix[targetX][targetY]
                             a.food = False
+                            
             elif move[0] == "PASS":
                 pass
+            
             else:
-                # Invalid command: kill ant?
-                pass
+                a.die()
+                deadAnts.append(a)
             
             # Attempt to place this ant in next phase of simulation. Ants in conflict must go back
-            # XXX Verify this implementation works--what if a third ant tries after
-            # a resolved conflict?
             if loc not in proposedMoves:
                 proposedMoves[loc] = a
             else:
@@ -306,19 +324,27 @@ def gameLoop(matrix, ants):
                 matrix[a.x][a.y].remove(antMatrixDict[a])
                 a.x = loc[0]
                 a.y = loc[1]
+
         placeAnts(matrix, ants)
         printMap(matrix)
         print("Team 1:", str(team1Points), "Team 2:", str(team2Points))
 
         # Receive messages from ants from this round
         for a in ants:
-            if a.team == 1:
-                team1Messages += a.recv()
-            elif a.team == 2:
-                team2Messages += a.recv()
+            if a.alive:
+                try:
+                    if a.team == 1:
+                        team1Messages += a.recv()
+                    elif a.team == 2:
+                        team2Messages += a.recv()
+                except:
+                    a.die()
+                    deadAnts.append(a)
 
-print("Press enter to execute next round")    
+        ants[:] = [a for a in ants if not a in deadAnts] # Remove the dead ants
+
+#print("Press enter to execute next round")    
 initializeAnts(team1, team1Starting, team2, team2Starting)
 initializeMatrix(matrix, amountFood, numObstacles, ants)
 printMap(matrix)
-gameLoop(matrix, ants)
+gameLoop(matrix, ants)ameLoop(matrix, ants)
