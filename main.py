@@ -16,13 +16,14 @@ from concurrent.futures import wait, ProcessPoolExecutor, ThreadPoolExecutor, Ti
 from HorizontalStrat import HorizontalStrat
 from VerticalStrat import VerticalStrat
 from RandomStrat import RandomStrat
-from AnthillFinderStrat import AnthillFinderStrat
-from AStarStrat import AStarStrat
+from SmarterRandomStrat import SmarterRandomStrat
+from StraightHomeStrat import StraightHomeStrat
 from GridBuilderStrat import GridBuilderStrat
 from ScoutStrat import ScoutStrat
+from StarterStrat import StarterStrat
     
 # B. Register strategy class names in team1/team2 tuples below, 1-4 ants per team
-team1 = (AStarStrat, AStarStrat, AStarStrat, AStarStrat)
+team1 = (StraightHomeStrat, StraightHomeStrat, StraightHomeStrat, StraightHomeStrat)
 team2 = (GridBuilderStrat,  GridBuilderStrat, GridBuilderStrat, GridBuilderStrat)
 
 # --- Begin Game ---
