@@ -22,7 +22,7 @@ Ants have four moves they can make on their turn:
 1. PASS: Do nothing.
 2. [direction]: Issue one of the cardinal directions (see below) to attempt moving in that direction. The top of the map is north.
 3. DROP [direction]: If carrying food, it will be dropped at the coordinates in the direction given.
-4. GET [direction]: If there is food in the direction given, pick up the food.
+4. GET [direction]: If there is food in the direction given, pick up the food. Ants can carry one food at a time.
 
 All ants move simutaneously. If the actions of two or more ants conflict (possible with moving or GET), these ants' actions won't be executed. Raising an exception, taking too long, or returning an invalid command will result in your ant being eliminated. The game will print a hint of what went wrong.
 
