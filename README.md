@@ -55,3 +55,20 @@ First, add an import to the list of `AntStrategy` subclass imports in `main.py` 
 Then, find the two tuples called `team1` and `team2`.
 Change the contents of these so that they're the names of the 1-4 AntStrategy classes you want on each team.
 If using CodeHS, click Run! If using something else, execute `main.py` (on the commandline: `$ python3 main.py`).
+
+### Saving and Loading a Map from a File
+To test your ants under the same conditions
+(map and/or random seed),
+you can save and load the game state from a file.
+At the end of a game,
+you will be asked if you would like to save the map and random seed to a file and prompted for a filename if so.
+To load either the map or seed at the beginning of a game,
+answer "yes" when prompted.
+Always enter *relative* paths to the files you are saving from or loading
+(if it's in the same folder as `main.py`, it's just the name of the file).
+
+### Debugging Mode
+By default, only short error messages are printed out when an exception occurs in an AntStrategy.
+To see the full traceback,
+set the `DEBUG` variable in `main.py` to `True`.
+This will show you the type of exception, the sequence of function calls, and the exact line in your AntStrategy that caused the error.
