@@ -1,3 +1,5 @@
+# Erro in oneStep in {e, F, ...}: list index out of range
+# Maybe need to swap max_x and max_y?
 # Ant Resource Collection Game
 #
 # To make ants and run game:
@@ -8,9 +10,11 @@
 # 4. Run this file. Ants will have 200 moves to try to score the most points
 #    by dropping food at their team's anthill
 
+from concurrent.futures import wait, ProcessPoolExecutor, ThreadPoolExecutor, TimeoutError
+import os
 import random
 import time
-from concurrent.futures import wait, ProcessPoolExecutor, ThreadPoolExecutor, TimeoutError
+import traceback
 
 # A. Import student strategies here
 from HorizontalStrat import HorizontalStrat
@@ -25,20 +29,13 @@ from StarterStrat import StarterStrat
 # B. Register strategy class names in team1/team2 tuples below, 1-4 ants per team
 team1 = (StraightHomeStrat, StraightHomeStrat, StraightHomeStrat, StraightHomeStrat)
 team2 = (GridBuilderStrat,  GridBuilderStrat, GridBuilderStrat, GridBuilderStrat)
+DEBUG = False # Change this to True to get more detailed errors from ant strategies
 
 # --- Begin Game ---
-ants = []
 
-# Matrix variables  
-rows = random.randrange(20,25) # Number of rows
-cols = random.randrange(20,25) # Number of columns
-matrix = []
-numObstacles = 10 #Number of obstacles
-amountFood = random.randrange(20, 25) # Amount of food
-northHill = (int((cols-1)/2), 1) # Location of north hill
-southHill = (cols-(int((cols-1)/2))-1, rows-2) # Location of south hill
-team1Starting = [(3,1), (6,1), (cols-7,1), (cols-4,1)]
-team2Starting = [(3,rows-2), (6,rows-2), (cols-7,rows-2), (cols-4,rows-2)]
+# Configuration variables for randomly generated maps
+numObstacles = 10 # Number of obstacles
+amountFood = random.randrange(20, 25) # Number of food piles
 
 # Matrix constants & ascii mappings
 EMPTY = 0
@@ -53,10 +50,11 @@ SOUTHTEAM1 = 19
 SOUTHTEAM2 = 20
 SOUTHTEAM3 = 21
 SOUTHTEAM4 = 22
-antMatrixDict = {} # Mapping of Ants to {NORTH,SOUTH}TEAM{1,2} above
 matrixSymbols = { EMPTY: '.', WALL: '#', NORTHHILL: '@', SOUTHHILL: 'X',
                 NORTHTEAM1: 'A', NORTHTEAM2: 'B', NORTHTEAM3: 'C', NORTHTEAM4: 'D',
                 SOUTHTEAM1: 'E', SOUTHTEAM2: 'F', SOUTHTEAM3: 'G', SOUTHTEAM4: 'H' }  
+
+antMatrixDict = {} # Mapping of Ants to {NORTH,SOUTH}TEAM{1,2} above
 
 class Ant:
     def __init__(self, strategy, x, y, team, symbol):
@@ -82,38 +80,116 @@ class Ant:
 
 def isOpenCell(matrix, x, y):
     """Check if a cell in matrix is in bounds and not a wall."""
-    return x > 0 and x < cols and y > 0 and y < rows and WALL not in matrix[x][y]
+    return x > 0 and x < len(matrix) and y > 0 and y < len(matrix[0]) and WALL not in matrix[x][y]
     
-def initializeAnts(team1Strats, team1Locs, team2Strats, team2Locs):
+def initializeAnts(team1Strats, team1Locs, team2Strats, team2Locs, rows, cols):
     """Instantiate ant classes for each team.
     
     Populate ants list and dictionary of Ant->matrixSymbol mappings. Takes two 
     lists for each team: AntStrategy class names and inital (x, y) positions
     """
     # Team 1
-    for Strat, (x, y), sym, num in zip(team1Strats, team1Locs, ["A", "B", "C", "D"], 
-    [NORTHTEAM1, NORTHTEAM2, NORTHTEAM3, NORTHTEAM4]):
+    for Strat, sym, num in zip(team1Strats, ["A", "B", "C", "D"], 
+            [NORTHTEAM1, NORTHTEAM2, NORTHTEAM3, NORTHTEAM4]):
         try:
-            antStrat = Strat(cols, rows, matrixSymbols[NORTHHILL])
+            antStrat = Strat(rows, cols, matrixSymbols[NORTHHILL])
         except Exception as e:
             print("Ant initialization failed for Team 1 AntStrategy: " + str(Strat))
+            if DEBUG:
+                print(traceback.format_exc())
             continue
-        ants.append(Ant(antStrat, x, y, 1, sym))   
+        ants.append(Ant(antStrat, team1Locs[sym][0], team1Locs[sym][1], 0, sym))
         antMatrixDict[ants[-1]] = num
 
     # Team 2
-    for Strat, (x, y), sym, num in zip(team2Strats, team2Locs, ["E", "F", "G", "H"],
-    [SOUTHTEAM1, SOUTHTEAM2, SOUTHTEAM3, SOUTHTEAM4]):
+    for Strat, sym, num in zip(team2Strats, ["E", "F", "G", "H"],
+            [SOUTHTEAM1, SOUTHTEAM2, SOUTHTEAM3, SOUTHTEAM4]):
         try:
-            antStrat = Strat(cols, rows, matrixSymbols[SOUTHHILL])
+            antStrat = Strat(rows, cols, matrixSymbols[SOUTHHILL])
         except Exception as e:
             print("Ant initialization failed for Team 2 AntStrategy: " + str(Strat))
+            if DEBUG:
+                print(traceback.format_exc())
             continue
-        ants.append(Ant(antStrat, x, y, 1, sym))
+        ants.append(Ant(antStrat, team2Locs[sym][0], team2Locs[sym][1], 1, sym))
         antMatrixDict[ants[-1]] = num
+
+def generateGameConfig():
+    """Prompt user for game configuration options, including saved map file
+
+    Returns: dict[str, boolean or str], with the following keys:
+        'fast_forward': boolean, continue to end without stopping
+        'load_map': boolean, use saved map
+        'load_seed': boolean, use saved seed for random number generation
+        'save_file': str, filename if load_map or load_seed is True
+    """
+    config = {
+            'fast_forward': False,
+            'load_map': False,
+            'load_seed': False,
+            'save_file': None,
+    }
+
+    fast_forward = input("Run to the end without pausing? (yes/<enter>) ")
+    if fast_forward.upper() == "YES":
+        config['fast_forward'] = True
+
+    load_map = input("Use saved map? (yes/<enter>) ")
+    if load_map.upper() == "YES":
+        config['load_map'] = True
+
+    load_seed = input("Use saved seed (for random number generation)? (yes/<enter>) ")
+    if load_seed.upper() == "YES":
+        config['load_seed'] = True
+
+    if config['load_map'] or config['load_seed']:
+        filepath = input("Enter path to save file: ")
+        if os.path.exists(filepath):
+           config['save_file'] = filepath
+        else:
+            print("File not found. Using new map and/or seed")
+            config['load_map'] = False
+            config['load_seed'] = False
+
+    return config
+
+def loadSaveFile(filename):
+    """Load saved game data from a file. Trusts that map is valid format.
+
+    Returns: dict[str, int or str] of game data
+        'map': 2D list of lists, game matrix
+        'seed': int
+
+    Raises: ValueError if file is incorrect format
+    """
+    with open(filename, 'r') as file:
+        lines = file.readlines()
+
+    file_data = {}
+    try:
+        label, seed = lines[0].split(" ")
+        file_data['seed'] = int(seed)
+        file_data['map'] = []
+        file_data['team1Starting'] = {}
+        file_data['team2Starting'] = {}
+        for y, string in enumerate(lines[1:]):
+            line = []
+            for x, c in enumerate(string.strip()):
+                if c in "ABCD":
+                    file_data['team1Starting'][c] = (x, y)
+                elif c in "EFGH":
+                    file_data['team2Starting'][c] = (x, y)
+                line.append(c)
+            file_data['map'].append(line)
+    except:
+        raise ValueError("Error loading save file: incorrect format")
+
+    return file_data
 
 def placeObstacles(matrix, numObstacles):
     """Place several vertical and horizontal barriers randomly in matrix."""
+    rows = len(matrix[0])
+    cols = len(matrix)
     while numObstacles > 0: # place obstacles (including mirror image)
         pickX = random.randrange(2, (cols - 3)) # don't place on left or right sides
         pickY = random.randrange(3, (rows - 4)) # don't place in top two or bottom two rows
@@ -140,6 +216,8 @@ def placeObstacles(matrix, numObstacles):
 
 def placeFood(matrix, amountFood):
     """Place ints representing food piles randomly in matrix."""
+    rows = len(matrix[0])
+    cols = len(matrix)
     while amountFood > 0: # place food (including mirror image)
         pickX = random.randrange(1, cols - 1)
         pickY = random.randrange(2, rows - 3) # Don't place in top or bottom row
@@ -155,43 +233,97 @@ def placeAnts(matrix, ants):
         if a.alive:
             matrix[a.x][a.y].append(antMatrixDict[a])
         
-def initializeMatrix(matrix, amountFood, numObstacles, ants):
-    """Construct and populate a cols X rows list with outer walls, obstacles, food, and ants."""
-    for i in range(cols): # Create initial array
-        col = []
-        for j in range(rows):
-            col.append([])
-        matrix.append(col)
+def initializeMatrixFromSaved(loaded_map):
+    new_matrix = [[[] for col in loaded_map] for row in loaded_map[0]]
+    for x, col in enumerate(loaded_map):
+        for y, cell in enumerate(col):
+            if cell == ".":
+                new_matrix[y][x].append(EMPTY)
+            elif cell == "#":
+                new_matrix[y][x].append(WALL)
+            elif cell.isdigit():
+                new_matrix[y][x].append(int(cell))
+            elif cell == "@":
+                new_matrix[y][x].append(NORTHHILL)
+            elif cell == "X":
+                new_matrix[y][x].append(SOUTHHILL)
+    return new_matrix
     
-    for i in range(rows): # Surround with walls
+def initializeMatrixRandom():
+    rows = random.randrange(20,25) # Number of rows
+    cols = random.randrange(20,25) # Number of columns
+    northHill = (int((cols-1)/2), 1) # Location of north hill
+    southHill = (cols-(int((cols-1)/2))-1, rows-2) # Location of south hill
+
+    matrix = [[[] for i in range(rows)] for j in range(cols)]
+
+    # Surround with walls
+    for i in range(rows):
         matrix[0][i] = [WALL]
         matrix[cols-1][i] = [WALL]
     for i in range(cols):
         matrix[i][0] = [WALL]
         matrix[i][rows-1] = [WALL]
+
+    # Place hills, obstacles, food
     matrix[northHill[0]][northHill[1]] = [NORTHHILL]
     matrix[southHill[0]][southHill[1]] = [SOUTHHILL]
     placeObstacles(matrix, numObstacles)
     placeFood(matrix, amountFood)
+
+    return matrix
+
+def constructMap(config):
+    """Construct matrix and initialize ants"""
+    if config['load_map']:
+        try:
+            file_data = loadSaveFile(config['save_file'])
+        except ValueError as e:
+            print(e)
+            if DEBUG:
+                print(traceback.format_exc())
+            print("Randomly generating new map")
+            config['load_map'] = False
+            return initializeMatrix(amountFood, numObstacles, ants, config)
+
+        loaded_map = file_data['map']
+        matrix = initializeMatrixFromSaved(loaded_map)
+        team1Starting = file_data['team1Starting']
+        team2Starting = file_data['team2Starting']
+    else:
+        matrix = initializeMatrixRandom()
+        cols = len(matrix)
+        rows = len(matrix[0])
+        team1Starting = {'A': (3,1), 'B': (6,1), 'C': (cols-7,1), 'D': (cols-4,1)}
+        team2Starting = {'E': (3,rows-2), 'F': (6,rows-2), 'G': (cols-7,rows-2), 'H': (cols-4,rows-2)}
+
+    initializeAnts(team1, team1Starting, team2, team2Starting, len(matrix), len(matrix[0]))
     placeAnts(matrix, ants)
-    
-def printMap(matrix):
-    """Print an ascii rendering of the map.
-    
-    If multiple items occupy the same
-    cell, only print the last one (prioritizes things that move (ants))
-    """
-    for row in range(rows):
+    return matrix
+
+def matrixToStrList(matrix):
+    out = []
+    for row in range(len(matrix[0])):
         output = ""
-        for col in range(cols):
+        for col in range(len(matrix)):
             if not matrix[col][row]:
                 output += matrixSymbols[EMPTY]
             elif matrix[col][row][-1] > 0 and matrix[col][row][-1] < 10:
                 output += str(matrix[col][row][-1])
             elif matrix[col][row][-1] in matrixSymbols:
                 output += matrixSymbols[matrix[col][row][-1]]
-        print(output)
-        
+        out.append(output)
+    return out
+
+def printMap(matrix):
+    """Print an ascii rendering of the map.
+
+    If multiple items occupy the same
+    cell, only print the last one (prioritizes things that move (ants))
+    """
+    for line in matrixToStrList(matrix):
+        print(line)
+
 def generateVision(matrix, x, y):
     """Return a 3x3 matrix representing the area surrounding x,y in the matrix.
     
@@ -234,7 +366,7 @@ def getMoveMain(ant, matrix):
     else:
         raise ValueError("Move should be of type string. Recieved: " + str(move))
 
-def gameLoop(matrix, ants):
+def gameLoop(matrix, ants, config):
     """Run game with initialized matrix and ants."""
     team1Points = 0
     team2Points = 0
@@ -253,9 +385,13 @@ def gameLoop(matrix, ants):
                     "NORTHWEST": lambda x, y: (x-1, y-1),
                     "HERE": lambda x, y: (x, y) }
 
-    for _ in range(200):
-        input() # Pause for me to hit enter!
-        #time.sleep(1) # Comment this out for stress testing
+    if not config['fast_forward']:
+        print("Press enter to execute next round")
+
+    printMap(matrix)
+    for lap in range(200):
+        if not config['fast_forward']:
+            input()
 
         # Pass messages to ants and clear buffers
         for a in ants:
@@ -263,6 +399,8 @@ def gameLoop(matrix, ants):
                 a.send(team1Messages if a.team == 1 else team2Messages)
             except Exception as e:
                 print("Error in " + a.symbol + " when receiving messages: " + str(e))
+                if DEBUG:
+                    print(traceback.format_exc())
                 killAnt(a)
         team1Messages = []
         team2Messages = []
@@ -279,6 +417,8 @@ def gameLoop(matrix, ants):
                 killAnt(a)
             except Exception as e:
                 print("Error in oneStep in " + a.symbol + ": " + str(e))
+                if DEBUG:
+                    print(traceback.format_exc())
                 killAnt(a)
 
         # Parse moves
@@ -379,7 +519,7 @@ def gameLoop(matrix, ants):
 
         placeAnts(matrix, ants)
         printMap(matrix)
-        print("Team 1:", str(team1Points), "Team 2:", str(team2Points))
+        print("Round:", lap, "Team 1:", str(team1Points), "Team 2:", str(team2Points))
 
         # Receive messages from ants from this round
         for a in ants:
@@ -390,6 +530,8 @@ def gameLoop(matrix, ants):
                         raise ValueError("Messages should be of type list.")
                 except Exception as e:
                     print("Error in " + a.symbol + " when sending messages: " + str(e))
+                    if DEBUG:
+                        print(traceback.format_exc())
                     killAnt(a)
                     continue
 
@@ -403,10 +545,21 @@ def gameLoop(matrix, ants):
     pool.shutdown()
     print("\n==== Final score ====\nTeam 1: " + str(team1Points) + " Team 2 : " + str(team2Points))
 
+def promptSaveMap(initialMatrix):
+    """Prompt user to save map and seed for a future game"""
+    save = input("Save map and random seed? (yes/<enter>) ")
+    if save.upper() == "YES":
+        filename = input("Enter filename: ")
+        with open(filename, "w+") as outfile:
+            outfile.write("seed: 0\n")
+            for line in initialMatrix:
+                outfile.write(line + "\n")
+
 # Ensure that only 'main' process/thread can execute this
 if __name__ == '__main__':
-    print("Press enter to execute next round")    
-    initializeAnts(team1, team1Starting, team2, team2Starting)
-    initializeMatrix(matrix, amountFood, numObstacles, ants)
-    printMap(matrix)
-    gameLoop(matrix, ants)
+    ants = []
+    config = generateGameConfig()
+    matrix = constructMap(config)
+    initialMatrix = matrixToStrList(matrix)
+    gameLoop(matrix, ants, config)
+    promptSaveMap(initialMatrix)
