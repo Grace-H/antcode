@@ -78,6 +78,9 @@ class Ant:
     def recv(self):
         return self.strategy.sendInfo()
 
+    def __repr__(self):
+        return a.symbol
+
 def isOpenCell(matrix, x, y):
     """Check if a cell in matrix is in bounds and not a wall."""
     return x > 0 and x < len(matrix) and y > 0 and y < len(matrix[0]) and WALL not in matrix[x][y]
@@ -120,13 +123,11 @@ def generateGameConfig():
     Returns: dict[str, boolean or str], with the following keys:
         'fast_forward': boolean, continue to end without stopping
         'load_map': boolean, use saved map
-        'load_seed': boolean, use saved seed for random number generation
-        'save_file': str, filename if load_map or load_seed is True
+        'save_file': str, filename if load_map is True
     """
     config = {
             'fast_forward': False,
             'load_map': False,
-            'load_seed': False,
             'save_file': None,
     }
 
@@ -138,27 +139,26 @@ def generateGameConfig():
     if load_map.upper() == "YES":
         config['load_map'] = True
 
-    load_seed = input("Use saved seed (for random number generation)? (yes/<enter>) ")
-    if load_seed.upper() == "YES":
-        config['load_seed'] = True
-
-    if config['load_map'] or config['load_seed']:
+    if config['load_map']:
         filepath = input("Enter path to save file: ")
         if os.path.exists(filepath):
            config['save_file'] = filepath
         else:
-            print("File not found. Using new map and/or seed")
+            print("File not found, using new map: " + filepath)
             config['load_map'] = False
-            config['load_seed'] = False
 
     return config
 
 def loadSaveFile(filename):
-    """Load saved game data from a file. Trusts that map is valid format.
+    """Load saved game data from a file.
 
-    Returns: dict[str, int or str] of game data
-        'map': 2D list of lists, game matrix
-        'seed': int
+    Trusts that map is valid format, with walls, 8 ants, and 2 anthills.
+
+    Returns:
+        Dict[str, int or str] of game data with following keys:
+            'map': List[str], game matrix
+            'team1Starting': (int, int) x,y tuple representing starting positions
+            'team2Starting': (int, int) "
 
     Raises: ValueError if file is incorrect format
     """
@@ -167,12 +167,10 @@ def loadSaveFile(filename):
 
     file_data = {}
     try:
-        label, seed = lines[0].split(" ")
-        file_data['seed'] = int(seed)
         file_data['map'] = []
         file_data['team1Starting'] = {}
         file_data['team2Starting'] = {}
-        for y, string in enumerate(lines[1:]):
+        for y, string in enumerate(lines):
             line = []
             for x, c in enumerate(string.strip()):
                 if c in "ABCD":
@@ -546,12 +544,11 @@ def gameLoop(matrix, ants, config):
     print("\n==== Final score ====\nTeam 1: " + str(team1Points) + " Team 2 : " + str(team2Points))
 
 def promptSaveMap(initialMatrix):
-    """Prompt user to save map and seed for a future game"""
-    save = input("Save map and random seed? (yes/<enter>) ")
+    """Prompt user to save map for a future game"""
+    save = input("Save map? (yes/<enter>) ")
     if save.upper() == "YES":
         filename = input("Enter filename: ")
         with open(filename, "w+") as outfile:
-            outfile.write("seed: 0\n")
             for line in initialMatrix:
                 outfile.write(line + "\n")
 
