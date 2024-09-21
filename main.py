@@ -1,5 +1,3 @@
-# Erro in oneStep in {e, F, ...}: list index out of range
-# Maybe need to swap max_x and max_y?
 # Ant Resource Collection Game
 #
 # To make ants and run game:
