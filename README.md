@@ -2,11 +2,10 @@
 Players code the behavior of ants that compete in teams bring food back to their anthill.
 
 ## Introduction
-Premise: Each team has 1-4 ants, which are placed on a grid. At the end of 200 rounds, whichever team has dropped the most food at their anthill wins. Ants have the ability to move, get food, drop food, and pass messages to their teammates.
+Each team has 1-4 ants, which are placed on a grid. At the end of 200 rounds, whichever team has dropped the most food at their anthill wins. Ants have the ability to move, get food, drop food, and pass messages to their teammates.
 
 ### The Map
-The map is randomly generated each round,
-with between 20 and 24 rows and columns.
+The map is randomly generated each round with between 20 and 24 rows and columns.
 It's printed to the console using the following symbols:
 
 | Symbol         | Meaning       |
@@ -57,12 +56,11 @@ Change the contents of these so that they're the names of the 1-4 AntStrategy cl
 If using CodeHS, click Run! If using something else, execute `main.py` (on the commandline: `$ python3 main.py`).
 
 ### Saving and Loading a Map from a File
-To test your ants under the same conditions
-(map and/or random seed),
+To test your ants under the same conditions,
 you can save and load the game state from a file.
 At the end of a game,
-you will be asked if you would like to save the map and random seed to a file and prompted for a filename if so.
-To load either the map or seed at the beginning of a game,
+you will be asked if you would like to save the map to a file and prompted for a filename if so.
+To load the map at the beginning of a game,
 answer "yes" when prompted.
 Always enter *relative* paths to the files you are saving from or loading
 (if it's in the same folder as `main.py`, it's just the name of the file).
