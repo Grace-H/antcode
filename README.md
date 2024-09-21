@@ -1,4 +1,4 @@
-# Anthill Resouce Collection Game
+# Antcode Resouce Collection Game
 Players code the behavior of ants that compete in teams bring food back to their anthill.
 
 ## Introduction
