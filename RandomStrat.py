@@ -7,6 +7,7 @@ class RandomStrat(AntStrategy):
     
     Left to its own devices, it will *eventually* score.
     '''
+
     def __init__(self, max_x, max_y, anthill):
         super().__init__(max_x, max_y, anthill)
         self.direction = "WEST"

@@ -1,6 +1,8 @@
 from AntStrategy import AntStrategy
 
 class VerticalStrat(AntStrategy):
+    '''Move up and down within grid boundaries'''
+
     def __init__(self, max_x, max_y, anthill):
         super().__init__(max_x, max_y, anthill)
         self.direction = "NORTH"
