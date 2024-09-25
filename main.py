@@ -516,17 +516,15 @@ def gameLoop(matrix, ants, config):
         printMap(matrix)
         print("Round:", lap, "Team 1:", str(team1Points), "Team 2:", str(team2Points))
         
-        # Add this round to an output list
+        # Add this round to an output string
         gameOutput += (
             f"==============================\n"
             f"ROUND {lap}\n"
             f"NORTH {team1Points}\n"
             f"SOUTH {team2Points}\n"
-            f"=============================\n"
+            f"=========================\n"
             f"{''.join(f'{line}\n' for line in matrixToStrList(matrix))}"
-            f"=============================\n"
         )
-
 
         # Receive messages from ants from this round
         for a in ants:
