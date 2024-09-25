@@ -373,6 +373,8 @@ def gameLoop(matrix, ants, config):
     team1Messages = []
     team2Messages = []
     
+    gameOutput = f"SIZE {len(matrix[0])} {len(matrix)}\n"
+    
     pool = ThreadPoolExecutor() # Can impose limits on number of threads
     
     transformXY = { "NORTH": lambda x, y: (x, y-1),
@@ -513,6 +515,18 @@ def gameLoop(matrix, ants, config):
         placeAnts(matrix, ants)
         printMap(matrix)
         print("Round:", lap, "Team 1:", str(team1Points), "Team 2:", str(team2Points))
+        
+        # Add this round to an output list
+        gameOutput += (
+            f"==============================\n"
+            f"ROUND {lap}\n"
+            f"NORTH {team1Points}\n"
+            f"SOUTH {team2Points}\n"
+            f"=============================\n"
+            f"{''.join(f'{line}\n' for line in matrixToStrList(matrix))}"
+            f"=============================\n"
+        )
+
 
         # Receive messages from ants from this round
         for a in ants:
@@ -534,9 +548,18 @@ def gameLoop(matrix, ants, config):
                     team2Messages += msgs
 
         ants[:] = [a for a in ants if a.alive] # Remove the dead ants
+        
+    gameOutput += "==============================\n"
 
     pool.shutdown()
     print("\n==== Final score ====\nTeam 1: " + str(team1Points) + " Team 2 : " + str(team2Points))
+    
+    # Prompt user to save full game output
+    save = input("Save game output? (yes/<enter>) ")
+    if save.upper() == "YES":
+        filename = input("Enter filename: ")
+        with open(filename, "w+") as outfile:
+            outfile.write(gameOutput)
 
 def promptSaveMap(initialMatrix):
     """Prompt user to save map for a future game"""
