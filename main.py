@@ -559,14 +559,19 @@ def gameLoop(matrix, ants, config):
     print("\n==== Final score ====\nTeam 1: " + str(team1Points) + " Team 2 : " + str(team2Points))
     if team1Points > team2Points:
         print("Winner: Team 1")
+        gameOutput += "WINNER NORTH\n"
     elif team2Points > team1Points:
         print("Winner: Team 2")
+        gameOutput += "WINNER SOUTH\n"
     elif team1_ahead > team2_ahead:
         print("Winner: Team 1")
+        gameOutput += "WINNER NORTH\n"
     elif team2_ahead > team1_ahead:
         print("Winner: Team 2")
+        gameOutput += "WINNER SOUTH\n"
     else:
         print("Winner: Tie")
+        gameOutput += "WINNER TIE\n"
 
     # Prompt user to save full game output
     save = input("Save game output? (yes/<enter>) ")
