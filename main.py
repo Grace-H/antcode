@@ -370,6 +370,8 @@ def gameLoop(matrix, ants, config):
     """Run game with initialized matrix and ants."""
     team1Points = 0
     team2Points = 0
+    team1_ahead = 0
+    team2_ahead = 0
     team1Messages = []
     team2Messages = []
     
@@ -462,7 +464,7 @@ def gameLoop(matrix, ants, config):
                             if cell.anthill == NORTH_HILL:
                                 team1Points += 1
                             elif cell.anthill == SOUTH_HILL:
-                                team2Points += 2
+                                team2Points += 1
 
                         else:
                             cell.food += 1
@@ -515,6 +517,10 @@ def gameLoop(matrix, ants, config):
         placeAnts(matrix, ants)
         printMap(matrix)
         print("Round:", lap, "Team 1:", str(team1Points), "Team 2:", str(team2Points))
+        if team1Points > team2Points:
+            team1_ahead += 1
+        elif team2Points > team1Points:
+            team2_ahead += 1
         
         # Add this round to an output string
         gameOutput += (
@@ -551,7 +557,22 @@ def gameLoop(matrix, ants, config):
 
     pool.shutdown()
     print("\n==== Final score ====\nTeam 1: " + str(team1Points) + " Team 2 : " + str(team2Points))
-    
+    if team1Points > team2Points:
+        print("Winner: Team 1")
+        gameOutput += "WINNER NORTH\n"
+    elif team2Points > team1Points:
+        print("Winner: Team 2")
+        gameOutput += "WINNER SOUTH\n"
+    elif team1_ahead > team2_ahead:
+        print("Winner: Team 1")
+        gameOutput += "WINNER NORTH\n"
+    elif team2_ahead > team1_ahead:
+        print("Winner: Team 2")
+        gameOutput += "WINNER SOUTH\n"
+    else:
+        print("Winner: Tie")
+        gameOutput += "WINNER TIE\n"
+
     # Prompt user to save full game output
     save = input("Save game output? (yes/<enter>) ")
     if save.upper() == "YES":
@@ -570,6 +591,7 @@ def promptSaveMap(initialMatrix):
 
 # Ensure that only 'main' process/thread can execute this
 if __name__ == '__main__':
+    random.seed()
     ants = []
     config = generateGameConfig()
     matrix = constructMap(config)
