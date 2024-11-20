@@ -529,8 +529,8 @@ def gameLoop(matrix, ants, config):
             f"NORTH {team1Points}\n"
             f"SOUTH {team2Points}\n"
             f"=========================\n"
-            f"{''.join(f'{line}\n' for line in matrixToStrList(matrix))}"
         )
+        gameOutput += ''.join(f'{line}\n' for line in matrixToStrList(matrix))
 
         # Receive messages from ants from this round
         for a in ants:
