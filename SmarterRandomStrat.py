@@ -18,9 +18,9 @@ class SmarterRandomStrat(AntStrategy):
 
     def send_info(self):
         '''Send messages.'''
-        toReturn = self.outbox
+        to_return = self.outbox
         self.outbox = []
-        return toReturn
+        return to_return
     
     def one_step(self, x, y, vision, food):
         '''Calculate and return a randomly chosen, but valid, next move.'''

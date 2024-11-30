@@ -23,11 +23,11 @@ class ScoutStrat(AntStrategy):
         self.grid[int((max_x-1)/2)][1] = "@"
         self.grid[max_x-(int((max_x-1)/2))-1][max_y - 2] = "X"
         
-        self.lastPlace = None # Where ant was last, to check if ant's movement blocked
+        self.last_place = None # Where ant was last, to check if ant's movement blocked
         
         # Variables for navigating to corners
         self.targets = [(1, 1), (max_x - 1, max_y - 1), (1, max_y - 1), (max_x - 1, 1)]
-        self.currentTarget = 0
+        self.current_target = 0
         self.visited = []
 
     def receive_info(self, messages):
@@ -38,9 +38,9 @@ class ScoutStrat(AntStrategy):
 
     def send_info(self):
         '''Pass off messages created in the last round.'''
-        toReturn = self.outbox
+        to_return = self.outbox
         self.outbox = []
-        return toReturn
+        return to_return
     
     def one_step(self, x, y, vision, food):
         '''Move towards next target corner of the grid, forming an X pattern.'''
@@ -55,34 +55,34 @@ class ScoutStrat(AntStrategy):
                 "NORTHWEST": (0, 0) }
         
         # Movement was blocked due to conflict, move random
-        if (x, y) == self.lastPlace:
+        if (x, y) == self.last_place:
             while True:
                 move = random.choice(["NORTH", "NORTHEAST", "EAST", "SOUTHEAST", "SOUTH", "SOUTHWEST", "WEST", "NORTHWEST"])
                 coords = cardinals[move]
                 if "#" not in vision[coords[0]][coords[1]]:
                     print(move)
                     return move
-        self.lastPlace = (x, y)
+        self.last_place = (x, y)
 
         # If ant's reached current target, set target to next target
-        if self.targets[self.currentTarget][0] == x and self.targets[self.currentTarget][0] == y:
-            self.currentTarget = (self.currentTarget + 1) % 4
+        if self.targets[self.current_target][0] == x and self.targets[self.current_target][0] == y:
+            self.current_target = (self.current_target + 1) % 4
             self.visited = []
 
         self.visited.append((x,y))
         
         # Find best direction to move to get to target coordinates
-        minDistance = 100000
+        min_distance = 100000
         move = "HERE"
         for direct, coords in cardinals.items():
             for agent in vision[coords[0]][coords[1]]:
-                newX = x + coords[0] - 1
-                newY = y + coords[1] - 1
-                self.grid[newX][newY] = agent
-                self.outbox.append(str(newX) + " " + str(newY) + " " + agent)
-                if agent != "#" and (newX, newY) not in self.visited:
-                    distance = abs(newX - self.targets[self.currentTarget][0]) + abs(newY - self.targets[self.currentTarget][1])
-                    if distance < minDistance:
-                        minDistance = distance
+                new_x = x + coords[0] - 1
+                new_y = y + coords[1] - 1
+                self.grid[new_x][new_y] = agent
+                self.outbox.append(str(new_x) + " " + str(new_y) + " " + agent)
+                if agent != "#" and (new_x, new_y) not in self.visited:
+                    distance = abs(new_x - self.targets[self.current_target][0]) + abs(new_y - self.targets[self.current_target][1])
+                    if distance < min_distance:
+                        min_distance = distance
                         move = direct
         return move
