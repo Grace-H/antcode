@@ -7,16 +7,16 @@ class VerticalStrat(AntStrategy):
         super().__init__(max_x, max_y, anthill)
         self.direction = "NORTH"
 
-    def receiveInfo(self, messages):
+    def receive_info(self, messages):
         '''Receive messages sent by teammates in the last round.
         Called by game'''
         pass
 
-    def sendInfo(self):
+    def send_info(self):
         '''Send messages. Called by game to get queued messages'''
         return []
     
-    def oneStep(self, x, y, vision):
+    def one_step(self, x, y, vision):
         '''Return next move'''
         if self.direction == "SOUTH":
             if x < self.max_y:

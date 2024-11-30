@@ -22,7 +22,7 @@ class AntStrategy:
         self.max_y = max_y
         self.anthill = anthill
     
-    def receiveInfo(self, messages):
+    def receive_info(self, messages):
         '''Receive messages sent by teammates in the last round.
         
         Called by game at the beginning of a round to deliver messages sent by 
@@ -34,7 +34,7 @@ class AntStrategy:
         '''
         raise NotImplementedError()
 
-    def sendInfo(self):
+    def send_info(self):
         '''Send messages to your teammates. 
         
         Called once by game at the end of each round. Messages will be passed to
@@ -45,7 +45,7 @@ class AntStrategy:
         '''
         raise NotImplementedError()
     
-    def oneStep(self, x, y, vision, food):
+    def one_step(self, x, y, vision, food):
         '''Calculate and return the next move for this ant.
         
         Args:

@@ -15,14 +15,14 @@ class StraightHomeStrat(AntStrategy):
             self.anthillXY = (max_x-(int((max_x-1)/2))-1, max_y-2)
         self.visited = [] # When going to anthill, cells that have already been visited
 
-    def receiveInfo(self, messages):
+    def receive_info(self, messages):
         '''
         Receive messages sent by teammates in the last round. Called by game.
         You may add to this method, but do not call it yourself.
         '''
         self.inbox = messages
 
-    def sendInfo(self):
+    def send_info(self):
         '''
         Send messages. Called by game to get queued messages
         You may add to this method, but do not call it yourself.
@@ -31,7 +31,7 @@ class StraightHomeStrat(AntStrategy):
         self.outbox = []
         return toReturn
     
-    def oneStep(self, x, y, vision, food):
+    def one_step(self, x, y, vision, food):
         '''Calculate and return a randomly chosen, but valid, next move.'''
         # Dictionary of string directions to (x, y) indices in vision
         cardinals = { "NORTH": (1, 0),

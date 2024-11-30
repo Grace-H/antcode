@@ -12,15 +12,15 @@ class RandomStrat(AntStrategy):
         super().__init__(max_x, max_y, anthill)
         self.direction = "WEST"
 
-    def receiveInfo(self, messages):
+    def receive_info(self, messages):
         '''This ant doesn't use message passing.'''
         pass
 
-    def sendInfo(self):
+    def send_info(self):
         '''Send messages. Returns empty list since ant never sends messages.'''
         return []
     
-    def oneStep(self, x, y, vision, food):
+    def one_step(self, x, y, vision, food):
         '''Calculate and return a randomly chosen, but valid, next move.'''
         # Mapping of cardinal words to (x, y) indices in vision
         cardinals = { "NORTH": (1, 0),

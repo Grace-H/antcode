@@ -25,8 +25,8 @@ from ScoutStrat import ScoutStrat
 from StarterStrat import StarterStrat
     
 # B. Register strategy class names in team1/team2 tuples below, 1-4 ants per team
-team1 = (StraightHomeStrat, StraightHomeStrat, StraightHomeStrat, StraightHomeStrat)
-team2 = (GridBuilderStrat,  GridBuilderStrat, GridBuilderStrat, GridBuilderStrat)
+team1 = (RandomStrat, SmarterRandomStrat, StraightHomeStrat, ScoutStrat)
+team2 = (GridBuilderStrat,  StarterStrat, HorizontalStrat, VerticalStrat)
 DEBUG = False # Change this to True to get more detailed errors from ant strategies
 
 # --- Begin Game ---
@@ -91,19 +91,19 @@ class Ant:
         self.alive = False
 
     def act(self, vision):
-        return self.strategy.oneStep(self.x, self.y, vision, self.food)
+        return self.strategy.one_step(self.x, self.y, vision, self.food)
     
     def send(self, messages):
-        self.strategy.receiveInfo(messages)
+        self.strategy.receive_info(messages)
     
     def recv(self):
-        return self.strategy.sendInfo()
+        return self.strategy.send_info()
 
     def get_symbol(self):
         return self.symbol if not self.food else self.symbol.lower()
 
     def __repr__(self):
-        return a.symbol
+        return self.symbol
 
 def is_open_cell(matrix, x, y):
     """Check if a cell in matrix is in bounds and not a wall."""
@@ -421,10 +421,10 @@ def game_loop(matrix, ants, config):
             try:
                 moves[a] = future.result(timeout=0.1)
             except TimeoutError:
-                print("Timeout waiting for oneStep in " + str(a))
+                print("Timeout waiting for one_step in " + str(a))
                 kill_ant(a)
             except Exception as e:
-                print("Error in oneStep in " + str(a) + ": " + str(e))
+                print("Error in one_step in " + str(a) + ": " + str(e))
                 if DEBUG:
                     print(traceback.format_exc())
                 kill_ant(a)

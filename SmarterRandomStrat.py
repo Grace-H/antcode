@@ -12,17 +12,17 @@ class SmarterRandomStrat(AntStrategy):
         self.outbox = []
         self.direction = "WEST"
 
-    def receiveInfo(self, messages):
+    def receive_info(self, messages):
         '''Receive messages sent by teammates in the last round.'''
         self.inbox = messages
 
-    def sendInfo(self):
+    def send_info(self):
         '''Send messages.'''
         toReturn = self.outbox
         self.outbox = []
         return toReturn
     
-    def oneStep(self, x, y, vision, food):
+    def one_step(self, x, y, vision, food):
         '''Calculate and return a randomly chosen, but valid, next move.'''
         cardinals = { "NORTH": (1, 0),
                 "SOUTH": (1, 2),

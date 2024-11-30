@@ -28,7 +28,7 @@ class GridBuilderStrat(AntStrategy):
         self.visited = [] # Past locations, used to prevent backtracking
         self.lastPlace = None # Tuple (x, y) where ant was last
 
-    def receiveInfo(self, messages):
+    def receive_info(self, messages):
         '''Update internal grid with messages received from teammates.
         
         Messages on this team have the format: X Y AGENT'''
@@ -36,13 +36,13 @@ class GridBuilderStrat(AntStrategy):
             x, y, agent = m.split()
             self.grid[int(x)][int(y)] = agent
 
-    def sendInfo(self):
+    def send_info(self):
         '''Send and clear outbox list of messages from this round'''
         toReturn = self.outbox
         self.outbox = []
         return toReturn
     
-    def oneStep(self, x, y, vision, food):
+    def one_step(self, x, y, vision, food):
         '''Report surroundings to teammates and calculate best move.
         
         If carrying food, move in direction closest to anthill. If not, move 

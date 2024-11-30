@@ -30,24 +30,21 @@ class ScoutStrat(AntStrategy):
         self.currentTarget = 0
         self.visited = []
 
-    def receiveInfo(self, messages):
-        '''Use teammates' input to update internal map.
-        '''
+    def receive_info(self, messages):
+        '''Use teammates' input to update internal map.'''
         for m in messages:
             x, y, agent = m.split()
             self.grid[int(x)][int(y)] = agent
 
-    def sendInfo(self):
+    def send_info(self):
         '''Pass off messages created in the last round.'''
         toReturn = self.outbox
         self.outbox = []
         return toReturn
     
-    def oneStep(self, x, y, vision, food):
+    def one_step(self, x, y, vision, food):
         '''Move towards next target corner of the grid, forming an X pattern.'''
-        
         # Dictionary of mappings between cardinal directions and (y, x) in vision
-
         cardinals = { "NORTH": (1, 0),
                 "SOUTH": (1, 2),
                 "EAST": (2, 1),

@@ -43,9 +43,9 @@ Several `AntStrategy` implementations, varying from terrible to decent, are prov
 
 ### `AntStrategy` Details
 Each `AntStrategy` has three methods for you to complete, which will be called in the following order each round by the main game:
-1. `receiveInfo()`: The game will pass a list of messages sent by your teammates in the last round. Parse & handle these messages. What messages are sent and their format is up to your team!
-2. `oneStep()`: Using the state information about your ant passed in as arguments, decide and return the next move for your ant.
-3. `sendInfo()`: Return any messages you want to send this round.
+1. `receive_info(messages)`: The game will pass a list of messages sent by your teammates in the last round. Parse & handle these messages. What messages are sent and their format is up to your team!
+2. `one_step()`: Using the state information about your ant passed in as arguments, decide and return the next move for your ant.
+3. `send_info()`: Return any messages you want to send this round.
 
 This class is fully documented, so see `AntStrategy.py` for more details about these methods and how the game interacts with the class.
 
