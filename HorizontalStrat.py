@@ -7,17 +7,16 @@ class HorizontalStrat(AntStrategy):
         super().__init__(max_x, max_y, anthill)
         self.direction = "WEST"
 
-    def receiveInfo(self, messages):
-        '''Receive messages sent by teammates in the last round.
-        Called by game'''
+    def receive_info(self, messages):
+        '''This ant doesn't do anything with messages it receives'''
         pass
 
-    def sendInfo(self):
-        '''Send messages. Called by game to get queued messages'''
+    def send_info(self):
+        '''This ant doesn't send any messages'''
         return []
     
-    def oneStep(self, x, y, vision, food):
-        '''Return next move'''
+    def one_step(self, x, y, vision, food):
+        '''Return next move, changing direction at grid boundaries'''
         if self.direction == "EAST":
             if x < self.max_x:
                 return self.direction

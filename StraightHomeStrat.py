@@ -10,28 +10,28 @@ class StraightHomeStrat(AntStrategy):
         self.outbox = []
         self.direction = "WEST"
         if anthill == "@":
-            self.anthillXY = (int((max_x-1)/2), 1)
+            self.anthill_xy = (int((max_x-1)/2), 1)
         else:
-            self.anthillXY = (max_x-(int((max_x-1)/2))-1, max_y-2)
+            self.anthill_xy = (max_x-(int((max_x-1)/2))-1, max_y-2)
         self.visited = [] # When going to anthill, cells that have already been visited
 
-    def receiveInfo(self, messages):
+    def receive_info(self, messages):
         '''
         Receive messages sent by teammates in the last round. Called by game.
         You may add to this method, but do not call it yourself.
         '''
         self.inbox = messages
 
-    def sendInfo(self):
+    def send_info(self):
         '''
         Send messages. Called by game to get queued messages
         You may add to this method, but do not call it yourself.
         '''
-        toReturn = self.outbox # lists are a reference type--does this need to be copy()?
+        to_return = self.outbox # lists are a reference type--does this need to be copy()?
         self.outbox = []
-        return toReturn
+        return to_return
     
-    def oneStep(self, x, y, vision, food):
+    def one_step(self, x, y, vision, food):
         '''Calculate and return a randomly chosen, but valid, next move.'''
         # Dictionary of string directions to (x, y) indices in vision
         cardinals = { "NORTH": (1, 0),
@@ -45,24 +45,24 @@ class StraightHomeStrat(AntStrategy):
                 "HERE": (1,1) }
 
         # Move towards anthill with food, GET if find food while not carrying
-        minDistance = 100000
+        min_distance = 100000
         move = (x, y, "HERE")
-        for direct, coords in cardinals.items():
+        for direction, coords in cardinals.items():
             for agent in vision[coords[0]][coords[1]]:
                 if food:
                     if agent == self.anthill:
                         self.visited = []
-                        return "DROP " + direct
+                        return "DROP " + direction
                     else:
-                        newX = x + coords[0] - 1
-                        newY = y + coords[1] - 1
-                        if agent != "#" and (newX, newY) not in self.visited:
-                            distance = abs(newX - self.anthillXY[0]) + abs(newY - self.anthillXY[1])
-                            if distance < minDistance:
-                                minDistance = distance
-                                move = (newX, newY, direct)
+                        new_x = x + coords[0] - 1
+                        new_y = y + coords[1] - 1
+                        if agent != "#" and (new_x, new_y) not in self.visited:
+                            distance = abs(new_x - self.anthill_xy[0]) + abs(new_y - self.anthill_xy[1])
+                            if distance < min_distance:
+                                min_distance = distance
+                                move = (new_x, new_y, direction)
                 if not food and agent.isdigit():
-                    return "GET " + direct
+                    return "GET " + direction
 
         if food:
             self.visited.append((move[0], move[1]))

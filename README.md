@@ -43,9 +43,9 @@ Several `AntStrategy` implementations, varying from terrible to decent, are prov
 
 ### `AntStrategy` Details
 Each `AntStrategy` has three methods for you to complete, which will be called in the following order each round by the main game:
-1. `receiveInfo()`: The game will pass a list of messages sent by your teammates in the last round. Parse & handle these messages. What messages are sent and their format is up to your team!
-2. `oneStep()`: Using the state information about your ant passed in as arguments, decide and return the next move for your ant.
-3. `sendInfo()`: Return any messages you want to send this round.
+1. `receive_info(messages)`: The game will pass a list of messages sent by your teammates in the last round. Parse & handle these messages. What messages are sent and their format is up to your team!
+2. `one_step()`: Using the state information about your ant passed in as arguments, decide on and return the next move for your ant.
+3. `send_info()`: Return any messages you want to send this round.
 
 This class is fully documented, so see `AntStrategy.py` for more details about these methods and how the game interacts with the class.
 
@@ -64,6 +64,14 @@ To load the map at the beginning of a game,
 answer "yes" when prompted.
 Always enter *relative* paths to the files you are saving from or loading
 (if it's in the same folder as `main.py`, it's just the name of the file).
+
+## Additional Information
+### Ant Vision
+One of the pieces of state information passed to the `one_step()` method is the ant's `vision`.
+This is a 3x3 list representing the locations in the map immediately under and around the ant with the ant at the center (`vision[1][1]`).
+Each index will have one of symbols in the key above, indicating what is around the ant in the map.
+(0,0) is northwest of the ant.
+Ants can "see" one unit in all directions.
 
 ### Debugging Mode
 By default, only short error messages are printed out when an exception occurs in an AntStrategy.
