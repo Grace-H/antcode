@@ -15,7 +15,7 @@ class VerticalStrat(AntStrategy):
         '''This ant doesn't send any messages'''
         return []
     
-    def one_step(self, x, y, vision):
+    def one_step(self, x, y, vision, food):
         '''Return next move, changing direction when a boundary is reached'''
         if self.direction == "SOUTH":
             if x < self.max_y:
