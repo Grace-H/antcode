@@ -1,5 +1,5 @@
 # Antcode Resouce Collection Game
-Players code the behavior of ants that compete in teams bring food back to their anthill.
+Players code the behavior of ants that compete in teams to bring food back to their anthill.
 
 ## Introduction
 Each team has 1-4 ants, which are placed on a grid. At the end of 200 rounds, whichever team has dropped the most food at their anthill wins. Ants have the ability to move, get food, drop food, and pass messages to their teammates.
