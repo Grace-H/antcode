@@ -124,7 +124,7 @@ def initialize_ants(team1_strats, team1_locs, team2_strats, team2_locs, rows, co
             if DEBUG:
                 print(traceback.format_exc())
             continue
-        ants.append(Ant(ant_strat, team1_locs[sym][0], team1_locs[sym][1], 0, sym))
+        ants.append(Ant(ant_strat, team1_locs[sym][0], team1_locs[sym][1], 1, sym))
 
     # Team 2
     for Strat, sym in zip(team2_strats, SOUTH_SYMS):
@@ -135,7 +135,7 @@ def initialize_ants(team1_strats, team1_locs, team2_strats, team2_locs, rows, co
             if DEBUG:
                 print(traceback.format_exc())
             continue
-        ants.append(Ant(ant_strat, team2_locs[sym][0], team2_locs[sym][1], 1, sym))
+        ants.append(Ant(ant_strat, team2_locs[sym][0], team2_locs[sym][1], 2, sym))
 
 def generate_game_config():
     """Prompt user for game configuration options, including saved map file
