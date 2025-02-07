@@ -5,7 +5,7 @@ Players code the behavior of ants that compete in teams to bring food back to th
 Each team has 1-4 ants, which are placed on a grid. At the end of 200 rounds, whichever team has dropped the most food at their anthill wins. Ants have the ability to move, get food, drop food, and pass messages to their teammates.
 
 ### The Map
-The map is randomly generated each round with between 20 and 24 rows and columns.
+The map is randomly generated each round with 20-24 rows and columns.
 It's printed to the console using the following symbols:
 
 | Symbol         | Meaning       |
@@ -72,6 +72,51 @@ This is a 3x3 list representing the locations in the map immediately under and a
 Each index will have one of symbols in the key above, indicating what is around the ant in the map.
 (0,0) is northwest of the ant.
 Ants can "see" one unit in all directions.
+
+### Message Passing
+Each round, your ant will have the ability to receive messages sent by your team in the prior round and send messages.
+Your team will need to decide what information you want to communicate and how to format your messages.
+Suppose your team wants to share whether they're carrying food at the end of each round.
+You might choose the message format `"ANT1 FOOD " + str(food)`.
+`GridBuilderStrat` and `ScoutStrat` send messages about what they've discovered on the map in the format `str(x) + " " + str(y) + " " + item`.
+Each of these examples is a string, but the messages don't have to be strings.
+`SmarterRandomStrat` isn't very creative and just sends the word `"message"` to its teammates.
+If you try to run GridBuilderStrat and SmarterRandomStrat together, you will see an error because they try to parse each others' messages incorrectly!
+
+At the beginning of each round, the game will call `receive_info` on your ant. It will pass a `list` of messages from your teammates.
+Parse each message according to the your team's format and update your ant's state if needed.
+For example, `GridBuilderStrat` uses the messages to fill in its internal map of the playing field and even has some basic checks to avoid causing an exception if a message is the wrong format.
+```python3
+def receive_info(self, messages):
+    for m in messages:
+        words = m.split()
+        if len(words) != 3:
+            print("Message incorrectly formatted: " + m);
+            continue
+        x, y, agent = words
+        self.grid[int(x)][int(y)] = agent
+```
+
+Then, the game will call the `one_step` method.
+Do not call `send_info` yourself from `one_step`; it's called by the game after `one_step`.
+Since you may want to share information learned during `one_step` with your teammates, one solution is to create an instance variable for outgoing messages, e.g. `self.outbox = []`.
+
+In `send_info`, your ant can return a `list` of messages.
+Here's an example where an ant shares if it's carrying food. Note that this method still returns a list even though there's only one message.
+```python3
+def send_info(self):
+    '''Send whether or not I'm carrying food'''
+    return ["ANT1 FOOD " + str(self.food)]
+```
+
+`GridBuilderStrat` returns the contents of its outbox and resets it to an empty list.
+```python3
+def send_info(self):
+    '''Send and clear outbox list of messages from this round'''
+    to_return = self.outbox
+    self.outbox = []
+    return to_return
+```
 
 ### Debugging Mode
 By default, only short error messages are printed out when an exception occurs in an AntStrategy.
