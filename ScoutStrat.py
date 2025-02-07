@@ -33,7 +33,11 @@ class ScoutStrat(AntStrategy):
     def receive_info(self, messages):
         '''Use teammates' input to update internal map.'''
         for m in messages:
-            x, y, agent = m.split()
+            words = m.split()
+            if len(words) != 3:
+                print("Message incorrectly formatted: " + m);
+                continue
+            x, y, agent = words
             self.grid[int(x)][int(y)] = agent
 
     def send_info(self):
@@ -60,7 +64,6 @@ class ScoutStrat(AntStrategy):
                 move = random.choice(["NORTH", "NORTHEAST", "EAST", "SOUTHEAST", "SOUTH", "SOUTHWEST", "WEST", "NORTHWEST"])
                 coords = cardinals[move]
                 if "#" not in vision[coords[0]][coords[1]]:
-                    print(move)
                     return move
         self.last_place = (x, y)
 

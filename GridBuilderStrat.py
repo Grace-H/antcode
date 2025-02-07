@@ -6,11 +6,11 @@ class GridBuilderStrat(AntStrategy):
 
     Based on internal grid, repeatedly go to closest food and return to hill.
     '''
-    
+
     def __init__(self, max_x, max_y, anthill):
         super().__init__(max_x, max_y, anthill)
         self.outbox = [] # Queued messages to send
-        
+
         # Initialize internal grid
         self.grid = [["." for y in range(max_y)] for x in range(max_x)]
         for i in range(max_x):
@@ -21,7 +21,7 @@ class GridBuilderStrat(AntStrategy):
             self.grid[max_x - 1][i] = "#"
         if anthill == "@":
             self.anthill_xy = (int((max_x-1)/2), 1)
-        else:                
+        else:
             self.anthill_xy = (max_x - (int((max_x - 1) / 2)) - 1, max_y - 2)
         self.grid[self.anthill_xy[0]][self.anthill_xy[1]] = anthill
 
@@ -30,10 +30,14 @@ class GridBuilderStrat(AntStrategy):
 
     def receive_info(self, messages):
         '''Update internal grid with messages received from teammates.
-        
+
         Messages on this team have the format: X Y AGENT'''
         for m in messages:
-            x, y, agent = m.split()
+            words = m.split()
+            if len(words) != 3:
+                print("Message incorrectly formatted: " + m);
+                continue
+            x, y, agent = words
             self.grid[int(x)][int(y)] = agent
 
     def send_info(self):
@@ -41,11 +45,11 @@ class GridBuilderStrat(AntStrategy):
         to_return = self.outbox
         self.outbox = []
         return to_return
-    
+
     def one_step(self, x, y, vision, food):
         '''Report surroundings to teammates and calculate best move.
-        
-        If carrying food, move in direction closest to anthill. If not, move 
+
+        If carrying food, move in direction closest to anthill. If not, move
         towards nearest food pile. If no known food piles, move randomly.
         '''
         # Cardinal directions (x, y): indices in vision array for each

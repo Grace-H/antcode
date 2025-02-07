@@ -21,7 +21,7 @@ class SmarterRandomStrat(AntStrategy):
         to_return = self.outbox
         self.outbox = []
         return to_return
-    
+
     def one_step(self, x, y, vision, food):
         '''Calculate and return a randomly chosen, but valid, next move.'''
         cardinals = { "NORTH": (1, 0),
