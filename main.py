@@ -361,6 +361,7 @@ def get_move_main(ant, matrix):
     Returns an array of strings representing move. Performs basic input 
     validation by checking move's type and length. May raise ValueError.
     """
+    print(ant.symbol + " is at " + str(ant.x) + "," + str(ant.y))
     move = ant.act(generate_vision(matrix, ant.x, ant.y))
     if type(move) == str:
         split_move = move.split()
@@ -440,6 +441,7 @@ def game_loop(matrix, ants, config):
                 new_loc = transform_xy[move[0]](loc[0], loc[1])
                 if is_open_cell(matrix, new_loc[0], new_loc[1]):
                     loc = new_loc
+                    print(a.symbol + " wants to move to " + str(loc[0]) + "," + str(loc[1]))
 
             elif move[0] == "GET":
                 if len(move) != 2 or move[1] not in transform_xy:
@@ -517,6 +519,7 @@ def game_loop(matrix, ants, config):
                 matrix[a.x][a.y].ant = None
                 a.x = loc[0]
                 a.y = loc[1]
+                print(a.symbol + " is moving to " + str(loc[0]) + "," + str(loc[1]))
 
         place_ants(matrix, ants)
         print_map(matrix)
