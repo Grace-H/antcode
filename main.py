@@ -442,8 +442,11 @@ def game_loop(matrix, ants, config):
                 if is_open_cell(matrix, new_loc[0], new_loc[1]):
                     loc = new_loc
                     print(a.symbol + " wants to move to " + str(loc[0]) + "," + str(loc[1]))
+                else:
+                    print(a.symbol + " wants to move to invalid " + str(new_loc[0]) + "," + str(new_loc[1]))
 
             elif move[0] == "GET":
+                print(a.symbol + " wants to GET " + str(move[1]))
                 if len(move) != 2 or move[1] not in transform_xy:
                     print("Invalid GET in " + a.symbol + ": " + str(move))
                     kill_ant(a)
@@ -457,6 +460,7 @@ def game_loop(matrix, ants, config):
                             proposed_gets[(target_x, target_y)] = [a]
 
             elif move[0] == "DROP":
+                print(a.symbol + " wants to DROP " + str(move[1]))
                 if len(move) != 2 or move[1] not in transform_xy:
                     print("Invalid DROP in " + a.symbol + ": " + str(move))
                     kill_ant(a)
@@ -475,6 +479,8 @@ def game_loop(matrix, ants, config):
                         else:
                             cell.food += 1
 
+            elif move[0] == "PASS":
+                print(a.symbol + " gave command PASS")
             elif move[0] != "PASS":
                 print("Invalid move from " + a.symbol + ": " + str(move))
                 kill_ant(a)
@@ -519,7 +525,7 @@ def game_loop(matrix, ants, config):
                 matrix[a.x][a.y].ant = None
                 a.x = loc[0]
                 a.y = loc[1]
-                print(a.symbol + " is moving to " + str(loc[0]) + "," + str(loc[1]))
+                print(a.symbol + " final position " + str(loc[0]) + "," + str(loc[1]))
 
         place_ants(matrix, ants)
         print_map(matrix)
