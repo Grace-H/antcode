@@ -25,9 +25,9 @@ from ScoutStrat import ScoutStrat
 from StarterStrat import StarterStrat
     
 # B. Register strategy class names in team1/team2 tuples below, 1-5 ants per team
-team1 = (VerticalStrat, VerticalStrat, StraightHomeStrat, SmarterRandomStrat, RandomStrat)
-team2 = (VerticalStrat, VerticalStrat, StraightHomeStrat, SmarterRandomStrat, RandomStrat)
-DEBUG = True # Change this to True to get more detailed errors from ant strategies
+team1 = (RandomStrat, SmarterRandomStrat, StraightHomeStrat, ScoutStrat, RandomStrat)
+team2 = (GridBuilderStrat, StarterStrat, HorizontalStrat, VerticalStrat, RandomStrat)
+DEBUG = False # Change this to True to get more detailed errors from ant strategies
 
 # --- Begin Game ---
 
@@ -204,7 +204,6 @@ def load_save_file(filename):
 
     return file_data
 
-## TODO
 def place_obstacles(matrix, num_obstacles):
     """Place several vertical and horizontal barriers randomly in matrix."""
     rows = len(matrix[0])
