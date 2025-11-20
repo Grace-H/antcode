@@ -52,7 +52,7 @@ This class is fully documented, so see `AntStrategy.py` for more details about t
 ## Running the Simulation
 First, add an import to the list of `AntStrategy` subclass imports in `main.py` to import your class.
 Then, find the two tuples called `team1` and `team2`.
-Change the contents of these so that they're the names of the 1-4 AntStrategy classes you want on each team.
+Change the contents of these so that they're the names of the 1-5 AntStrategy classes you want on each team.
 If using CodeHS, click Run! If using something else, execute `main.py` (on the commandline: `$ python3 main.py`).
 
 ### Saving and Loading a Map from a File
@@ -123,3 +123,8 @@ By default, only short error messages are printed out when an exception occurs i
 To see the full traceback,
 set the `DEBUG` variable in `main.py` to `True`.
 This will show you the type of exception, the sequence of function calls, and the exact line in your AntStrategy that caused the error.
+
+### Ties
+If both teams of ants finish with the same total food dropped on each anthill, the winner is the team that held the lead in more rounds. For instance, if the North team has more food dropped on the anthill for 100 rounds, and the South team has more food dropped on the anthill for 40 rounds, the North team wins the match.
+
+If both teams lead for the same number of rounds, the game is a true tie.

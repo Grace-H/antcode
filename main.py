@@ -24,9 +24,9 @@ from GridBuilderStrat import GridBuilderStrat
 from ScoutStrat import ScoutStrat
 from StarterStrat import StarterStrat
     
-# B. Register strategy class names in team1/team2 tuples below, 1-4 ants per team
-team1 = (RandomStrat, SmarterRandomStrat, StraightHomeStrat, ScoutStrat)
-team2 = (GridBuilderStrat,  StarterStrat, HorizontalStrat, VerticalStrat)
+# B. Register strategy class names in team1/team2 tuples below, 1-5 ants per team
+team1 = (RandomStrat, SmarterRandomStrat, StraightHomeStrat, ScoutStrat, RandomStrat)
+team2 = (GridBuilderStrat, StarterStrat, HorizontalStrat, VerticalStrat, RandomStrat)
 DEBUG = False # Change this to True to get more detailed errors from ant strategies
 
 # --- Begin Game ---
@@ -40,8 +40,8 @@ EMPTY = '.'
 WALL = '#'
 NORTH_HILL = '@'
 SOUTH_HILL = 'X'
-NORTH_SYMS = ["A", "B", "C", "D"]
-SOUTH_SYMS = ["E", "F", "G", "H"]
+NORTH_SYMS = ["A", "B", "C", "D", "E"]
+SOUTH_SYMS = ["F", "G", "H", "I", "J"]
 
 class Cell:
     '''Cell in the game matrix.
@@ -172,7 +172,7 @@ def generate_game_config():
 def load_save_file(filename):
     """Load saved game data from a file.
 
-    Trusts that map is valid format, with walls, 8 ants, and 2 anthills.
+    Trusts that map is valid format, with walls, 10 ants, and 2 anthills.
 
     Returns:
         Dict[str, int or str] of game data with following keys:
@@ -213,12 +213,12 @@ def place_obstacles(matrix, num_obstacles):
         pick_x = random.randrange(2, (cols - 3)) # don't place on left or right sides
         pick_y = random.randrange(3, (rows - 4)) # don't place in top two or bottom two rows
         if matrix[pick_x][pick_y].is_empty():
-            direction = random.randrange(0, 1) # 0 is horizontal, 1 is vertical
+            direction = random.randrange(0, 2) # 0 is horizontal, 1 is vertical
             length = random.randrange(1, 5) # length of obstacle
             if direction == 0: # horizontal obstacle
                 for x in range(length):
-                    if pick_x < cols/2: # left half of screen
-                        matrix[pick_x][pick_y].wall = True
+                    if pick_x < cols/2: # left half of screen 
+                        matrix[pick_x+x][pick_y].wall = True
                         matrix[cols-pick_x-1-x][rows-pick_y-1].wall = True
                     else: # right half of screen
                         matrix[pick_x-x][pick_y].wall = True
@@ -312,8 +312,14 @@ def construct_map(config):
         matrix = initialize_matrix_random()
         cols = len(matrix)
         rows = len(matrix[0])
-        team1_starting = {'A': (3,1), 'B': (6,1), 'C': (cols-7,1), 'D': (cols-4,1)}
-        team2_starting = {'E': (3,rows-2), 'F': (6,rows-2), 'G': (cols-7,rows-2), 'H': (cols-4,rows-2)}
+        ## Calculate position of middle ant based on anthill location
+        top_hill = int((cols-1)/2)+1
+        if (cols % 2 == 0):
+            bottom_hill = cols-(int((cols)/2))-1
+        else:
+            bottom_hill = cols-(int((cols)/2))
+        team1_starting = {'A': (3,1), 'B': (6,1), 'C': (top_hill,1), 'D': (cols-7,1), 'E': (cols-4,1)}
+        team2_starting = {'F': (3,rows-2), 'G': (6,rows-2), 'H': (bottom_hill, rows-2), 'I': (cols-7,rows-2), 'J': (cols-4,rows-2)}
 
     initialize_ants(team1, team1_starting, team2, team2_starting, len(matrix), len(matrix[0]))
     place_ants(matrix, ants)
