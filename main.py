@@ -25,9 +25,9 @@ from ScoutStrat import ScoutStrat
 from StarterStrat import StarterStrat
     
 # B. Register strategy class names in team1/team2 tuples below, 1-5 ants per team
-team1 = (VerticalStrat, VerticalStrat, StraightHomeStrat, SmarterRandomStrat, RandomStrat)
-team2 = (VerticalStrat, VerticalStrat, StraightHomeStrat, SmarterRandomStrat, RandomStrat)
-DEBUG = True # Change this to True to get more detailed errors from ant strategies
+team1 = (RandomStrat, SmarterRandomStrat, StraightHomeStrat, ScoutStrat, RandomStrat)
+team2 = (GridBuilderStrat, StarterStrat, HorizontalStrat, VerticalStrat, RandomStrat)
+DEBUG = False # Change this to True to get more detailed errors from ant strategies
 
 # --- Begin Game ---
 
@@ -204,7 +204,6 @@ def load_save_file(filename):
 
     return file_data
 
-## TODO
 def place_obstacles(matrix, num_obstacles):
     """Place several vertical and horizontal barriers randomly in matrix."""
     rows = len(matrix[0])
@@ -358,6 +357,7 @@ def generate_vision(matrix, x, y):
     return vision
 
 def kill_ant(ant):
+    print("Ant " + ant.symbol + " died.")
     ant.die()
     matrix[ant.x][ant.y].ant = None
 
@@ -490,7 +490,7 @@ def game_loop(matrix, ants, config):
                 proposed_moves[loc] = a
             else:
                 conflict_ant = proposed_moves[loc]
-
+                print("Collision between " + a.symbol + " and " + conflict_ant.symbol)
                 # Return this ant to original position, resolving any chains of conflicts
                 proposed_moves[loc] = None # No one gets to be here
                 current_ant = a
@@ -504,6 +504,7 @@ def game_loop(matrix, ants, config):
 
                 # Return conflicting ant to original position, resolving conflicts
                 while conflict_ant and (conflict_ant.x, conflict_ant.y) in proposed_moves and proposed_moves[(conflict_ant.x, conflict_ant.y)]:
+                    print("Invalid move from " + conflict_ant.symbol + ": " + str(move))
                     next_conflict_ant = proposed_moves[(conflict_ant.x, conflict_ant.y)]
                     proposed_moves[(conflict_ant.x, conflict_ant.y)] = conflict_ant
                     conflict_ant = next_conflict_ant
@@ -517,6 +518,8 @@ def game_loop(matrix, ants, config):
                 for a in aList:
                     a.food = True
                 matrix[target_x][target_y].food -= len(aList)
+            else: ## insufficient food
+                print("Invalid GET in " + a.symbol + ": " + str(move))
 
         # Update arena & redraw screen
         for loc, a in proposed_moves.items():
