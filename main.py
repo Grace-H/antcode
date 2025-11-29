@@ -504,7 +504,6 @@ def game_loop(matrix, ants, config):
 
                 # Return conflicting ant to original position, resolving conflicts
                 while conflict_ant and (conflict_ant.x, conflict_ant.y) in proposed_moves and proposed_moves[(conflict_ant.x, conflict_ant.y)]:
-                    print("Invalid move from " + conflict_ant.symbol + ": " + str(move))
                     next_conflict_ant = proposed_moves[(conflict_ant.x, conflict_ant.y)]
                     proposed_moves[(conflict_ant.x, conflict_ant.y)] = conflict_ant
                     conflict_ant = next_conflict_ant
