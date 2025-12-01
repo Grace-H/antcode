@@ -357,6 +357,7 @@ def generate_vision(matrix, x, y):
     return vision
 
 def kill_ant(ant):
+    print("Ant " + ant.symbol + " died.")
     ant.die()
     matrix[ant.x][ant.y].ant = None
 
@@ -489,7 +490,7 @@ def game_loop(matrix, ants, config):
                 proposed_moves[loc] = a
             else:
                 conflict_ant = proposed_moves[loc]
-
+                print("Collision between " + a.symbol + " and " + conflict_ant.symbol)
                 # Return this ant to original position, resolving any chains of conflicts
                 proposed_moves[loc] = None # No one gets to be here
                 current_ant = a
@@ -516,6 +517,8 @@ def game_loop(matrix, ants, config):
                 for a in aList:
                     a.food = True
                 matrix[target_x][target_y].food -= len(aList)
+            else: ## insufficient food
+                print("Invalid GET in " + a.symbol + ": " + str(move))
 
         # Update arena & redraw screen
         for loc, a in proposed_moves.items():
