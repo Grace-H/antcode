@@ -26,7 +26,7 @@ from StarterStrat import StarterStrat
     
 # B. Register strategy class names in team1/team2 tuples below, 1-5 ants per team
 team1 = (RandomStrat, SmarterRandomStrat, StraightHomeStrat, ScoutStrat, RandomStrat)
-team2 = (GridBuilderStrat, StarterStrat, HorizontalStrat, VerticalStrat, RandomStrat)
+team2 = (GridBuilderStrat, SmarterRandomStrat, HorizontalStrat, VerticalStrat, RandomStrat)
 DEBUG = False # Change this to True to get more detailed errors from ant strategies
 
 # --- Begin Game ---
@@ -105,9 +105,14 @@ class Ant:
     def __repr__(self):
         return self.symbol
 
-def is_open_cell(matrix, x, y):
+def is_open_cell(matrix, x, y, ant=''):
     """Check if a cell in matrix is in bounds and not a wall."""
-    return x > 0 and x < len(matrix) and y > 0 and y < len(matrix[0]) and not matrix[x][y].wall
+    if (x > 0 and x < len(matrix) and y > 0 and y < len(matrix[0]) and not matrix[x][y].wall):
+        return True
+    if (matrix[x][y].wall and ant != ''):
+        print("Collision between " + ant + " and a wall.")
+    
+    return False
     
 def initialize_ants(team1_strats, team1_locs, team2_strats, team2_locs, rows, cols):
     """Instantiate ant classes for each team.
@@ -445,7 +450,7 @@ def game_loop(matrix, ants, config):
             # Cardinal movement
             if move[0] in transform_xy and len(move) == 1:
                 new_loc = transform_xy[move[0]](loc[0], loc[1])
-                if is_open_cell(matrix, new_loc[0], new_loc[1]):
+                if is_open_cell(matrix, new_loc[0], new_loc[1], ant=a.symbol):
                     loc = new_loc
 
             elif move[0] == "GET":
