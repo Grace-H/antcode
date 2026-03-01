@@ -26,7 +26,7 @@ from StarterStrat import StarterStrat
     
 # B. Register strategy class names in team1/team2 tuples below, 3-5 ants per team
 team1 = (GridBuilderStrat, RandomStrat, SmarterRandomStrat, StraightHomeStrat, HorizontalStrat)
-team2 = (RandomStrat, HorizontalStrat, StarterStrat, HorizontalStrat, ScoutStrat)
+team2 = (RandomStrat, HorizontalStrat, VerticalStrat, HorizontalStrat, ScoutStrat)
 DEBUG = False # Change this to True to get more detailed errors from ant strategies
 
 # --- Begin Game ---
@@ -205,13 +205,6 @@ def generate_game_config(team1_strats, team2_strats):
             raise ValueError("Teams must have between 3-5 ants (inclusive).")
     else:
         raise ValueError("Teams must have the same number of ants.")
-
-    # uncomment these lines if varying number of active players per team per game
-    # ants_count = input("Number of ants on each team? (3-5) ")
-    # while(not ants_count.isnumeric() or int(ants_count) > 5 or int(ants_count) < 3):
-    #     print("Teams must have between 3 to 5 ants.")
-    #     ants_count = input("Number of ants on each team? (3-5) ")
-    # config['ants_count'] = int(ants_count)
             
     return config
 
@@ -300,6 +293,7 @@ def place_ants(matrix, ants):
             matrix[a.x][a.y].ant = a
         
 def initialize_matrix_from_saved(loaded_map):
+    """Initialize game matrix from save file."""
     new_matrix = [[Cell() for col in loaded_map] for row in loaded_map[0]]
     for x, col in enumerate(loaded_map):
         for y, cell in enumerate(col):
@@ -314,6 +308,7 @@ def initialize_matrix_from_saved(loaded_map):
     return new_matrix
     
 def initialize_matrix_random():
+    """Initialize new randomly generated game matrix."""
     rows = random.randrange(20,25) # Number of rows
     cols = random.randrange(20,25) # Number of columns
     north_hill = (int((cols-1)/2), 1) # Location of north hill
@@ -461,8 +456,18 @@ def game_loop(matrix, ants, config):
     if not config['fast_forward']:
         print("Press enter to execute next round")
 
+    # Starting map arrangement
     print_map(matrix)
-    for lap in range(200):
+    game_output += (
+            f"==============================\n"
+            f"ROUND 0\n"
+            f"NORTH 0\n"
+            f"SOUTH 0\n"
+            f"=========================\n"
+        )
+    game_output += ''.join(f'{line}\n' for line in matrix_to_str_list(matrix))
+
+    for lap in range(1, 201):
         if not config['fast_forward']:
             input()
 
